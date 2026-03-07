@@ -121,6 +121,20 @@ body {
   font-size: 1.5rem;
 }
 
+/* Grouped view */
+.group-section {
+  margin-bottom: 2rem;
+}
+
+.group-header {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #3498db;
+}
+
 /* Table - mobile first */
 .table-container {
   background: white;

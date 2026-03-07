@@ -74,6 +74,28 @@ export default function FormView({ schema, isEdit }) {
     navigate(`/${schema.id}`);
   };
 
+  const shouldShowField = (field) => {
+    if (!field.showIf) {
+      return true;
+    }
+
+    for (const [fieldName, expectedValue] of Object.entries(field.showIf)) {
+      const actualValue = formData[fieldName];
+
+      if (Array.isArray(expectedValue)) {
+        if (!expectedValue.includes(actualValue)) {
+          return false;
+        }
+      } else {
+        if (actualValue !== expectedValue) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  };
+
   if (loading) {
     return <div className="loading">Loading...</div>;
   }
@@ -88,7 +110,7 @@ export default function FormView({ schema, isEdit }) {
       </div>
 
       <form onSubmit={handleSubmit} className="data-form">
-        {schema.fields.map(field => (
+        {schema.fields.filter(shouldShowField).map(field => (
           <div key={field.id} className="form-field">
             <label htmlFor={field.id} className="field-label">
               {field.label}

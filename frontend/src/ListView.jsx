@@ -42,10 +42,53 @@ export default function ListView({ schema }) {
   };
 
   const displayFields = schema.fields.filter(f => f.displayInList);
+  const groupBy = schema.views?.list?.groupBy;
+
+  const groupItems = (items, groupByField) => {
+    if (!groupByField) {
+      return { 'All Items': items };
+    }
+
+    const groups = {};
+    items.forEach(item => {
+      const groupValue = item[groupByField] || 'Uncategorized';
+      if (!groups[groupValue]) {
+        groups[groupValue] = [];
+      }
+      groups[groupValue].push(item);
+    });
+    return groups;
+  };
+
+  const renderItemRow = (item) => (
+    <tr key={item.id}>
+      {displayFields.map(field => (
+        <td key={field.id}>
+          {formatValue(item[field.id], field)}
+        </td>
+      ))}
+      <td className="actions-column">
+        <button
+          className="btn btn-sm btn-secondary"
+          onClick={() => navigate(`/${schema.id}/edit/${item.id}`)}
+        >
+          Edit
+        </button>
+        <button
+          className="btn btn-sm btn-danger"
+          onClick={() => handleDelete(item.id)}
+        >
+          Delete
+        </button>
+      </td>
+    </tr>
+  );
 
   if (loading) {
     return <div className="loading">Loading...</div>;
   }
+
+  const groupedItems = groupItems(items, groupBy);
 
   return (
     <div className="list-view">
@@ -67,43 +110,28 @@ export default function ListView({ schema }) {
           <p>No items yet. Click "Add Item" to create one.</p>
         </div>
       ) : (
-        <div className="table-container">
-          <table className="data-table">
-            <thead>
-              <tr>
-                {displayFields.map(field => (
-                  <th key={field.id}>{field.label}</th>
-                ))}
-                <th className="actions-column">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map(item => (
-                <tr key={item.id}>
-                  {displayFields.map(field => (
-                    <td key={field.id}>
-                      {formatValue(item[field.id], field)}
-                    </td>
-                  ))}
-                  <td className="actions-column">
-                    <button
-                      className="btn btn-sm btn-secondary"
-                      onClick={() => navigate(`/${schema.id}/edit/${item.id}`)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="btn btn-sm btn-danger"
-                      onClick={() => handleDelete(item.id)}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <>
+          {Object.entries(groupedItems).map(([groupName, groupItems]) => (
+            <div key={groupName} className="group-section">
+              {groupBy && <h2 className="group-header">{formatGroupName(groupName)}</h2>}
+              <div className="table-container">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      {displayFields.map(field => (
+                        <th key={field.id}>{field.label}</th>
+                      ))}
+                      <th className="actions-column">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {groupItems.map(renderItemRow)}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ))}
+        </>
       )}
     </div>
   );
@@ -123,4 +151,11 @@ function formatValue(value, field) {
   }
 
   return String(value);
+}
+
+function formatGroupName(groupName) {
+  return groupName
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 }
