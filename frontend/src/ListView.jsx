@@ -43,6 +43,38 @@ export default function ListView({ schema }) {
 
   const displayFields = schema.fields.filter(f => f.displayInList);
   const groupBy = schema.views?.list?.groupBy;
+  const computedFields = schema.views?.list?.showComputed ? (schema.views?.list?.computed || {}) : {};
+
+  const computeFieldValue = (item, expression) => {
+    try {
+      // Create a safe context with only the item data
+      const context = { ...item };
+
+      // Handle common expressions
+      if (expression === 'usages.length') {
+        return Array.isArray(item.usages) ? item.usages.length : 0;
+      }
+
+      if (expression === 'usages[usages.length - 1]') {
+        return Array.isArray(item.usages) && item.usages.length > 0
+          ? item.usages[item.usages.length - 1]
+          : null;
+      }
+
+      if (expression.includes('Date.now()') && expression.includes('startDate')) {
+        // Days since start calculation
+        const startDate = new Date(item.startDate);
+        const now = new Date();
+        const days = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
+        return days;
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Error computing field:', error);
+      return null;
+    }
+  };
 
   const groupItems = (items, groupByField) => {
     if (!groupByField) {
@@ -65,6 +97,14 @@ export default function ListView({ schema }) {
       {displayFields.map(field => (
         <td key={field.id}>
           {formatValue(item[field.id], field)}
+        </td>
+      ))}
+      {Object.entries(computedFields).map(([fieldId, fieldConfig]) => (
+        <td key={`computed-${fieldId}`}>
+          {formatComputedValue(
+            computeFieldValue(item, fieldConfig.expression),
+            fieldConfig.type
+          )}
         </td>
       ))}
       <td className="actions-column">
@@ -121,6 +161,9 @@ export default function ListView({ schema }) {
                       {displayFields.map(field => (
                         <th key={field.id}>{field.label}</th>
                       ))}
+                      {Object.entries(computedFields).map(([fieldId, fieldConfig]) => (
+                        <th key={`computed-${fieldId}`}>{fieldConfig.label}</th>
+                      ))}
                       <th className="actions-column">Actions</th>
                     </tr>
                   </thead>
@@ -147,7 +190,10 @@ function formatValue(value, field) {
   }
 
   if (field.type === 'date' && value) {
-    return new Date(value).toLocaleDateString();
+    // Parse as local date to avoid timezone issues
+    const [year, month, day] = value.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    return date.toLocaleDateString();
   }
 
   return String(value);
@@ -158,4 +204,23 @@ function formatGroupName(groupName) {
     .split('-')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
+}
+
+function formatComputedValue(value, type) {
+  if (value === null || value === undefined) {
+    return '-';
+  }
+
+  if (type === 'date' && value) {
+    // Parse as local date to avoid timezone issues
+    const [year, month, day] = value.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    return date.toLocaleDateString();
+  }
+
+  if (typeof value === 'number') {
+    return Math.round(value);
+  }
+
+  return String(value);
 }

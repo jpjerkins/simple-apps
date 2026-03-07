@@ -3,7 +3,8 @@
 import sqlite3
 from pathlib import Path
 
-_DB_PATH = Path(__file__).parent.parent / "data" / "simple-apps.db"
+# Use /data which is mounted from persistent volume
+_DB_PATH = Path("/data") / "simple-apps.db"
 
 
 def _get_connection():

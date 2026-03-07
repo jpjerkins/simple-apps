@@ -220,6 +220,33 @@ body {
   height: 24px;
 }
 
+/* Array fields */
+.field-array {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.array-item {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.array-item .field-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.array-remove {
+  flex-shrink: 0;
+}
+
+.array-add {
+  margin-top: 0.5rem;
+  align-self: flex-start;
+}
+
 .form-actions {
   display: flex;
   gap: 0.75rem;

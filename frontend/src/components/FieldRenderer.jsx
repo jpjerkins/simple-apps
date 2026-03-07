@@ -6,6 +6,24 @@ export default function FieldRenderer({ field, value, onChange }) {
     onChange(newValue);
   };
 
+  const handleArrayChange = (index, newValue) => {
+    const arrayValue = Array.isArray(value) ? [...value] : [];
+    arrayValue[index] = newValue;
+    onChange(arrayValue);
+  };
+
+  const handleArrayAdd = () => {
+    const arrayValue = Array.isArray(value) ? [...value] : [];
+    arrayValue.push('');
+    onChange(arrayValue);
+  };
+
+  const handleArrayRemove = (index) => {
+    const arrayValue = Array.isArray(value) ? [...value] : [];
+    arrayValue.splice(index, 1);
+    onChange(arrayValue);
+  };
+
   const fieldValue = value ?? field.default ?? '';
 
   switch (field.type) {
@@ -84,6 +102,39 @@ export default function FieldRenderer({ field, value, onChange }) {
           onChange={handleChange}
           className="field-checkbox"
         />
+      );
+
+    case 'array':
+      const arrayValue = Array.isArray(value) ? value : (field.default || []);
+      const itemType = field.itemType || 'text';
+
+      return (
+        <div className="field-array">
+          {arrayValue.map((item, index) => (
+            <div key={index} className="array-item">
+              <input
+                type={itemType}
+                value={item || ''}
+                onChange={(e) => handleArrayChange(index, e.target.value)}
+                className="field-input"
+              />
+              <button
+                type="button"
+                onClick={() => handleArrayRemove(index)}
+                className="btn btn-sm btn-danger array-remove"
+              >
+                Remove
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={handleArrayAdd}
+            className="btn btn-sm btn-secondary array-add"
+          >
+            + Add {field.label}
+          </button>
+        </div>
       );
 
     default:

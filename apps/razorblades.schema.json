@@ -1,0 +1,64 @@
+{
+  "id": "razorblades",
+  "name": "Razor Blade Tracker",
+  "icon": "🪒",
+  "description": "Track razor blade usage to know when to replace",
+  "fields": [
+    {
+      "id": "brand",
+      "type": "text",
+      "label": "Blade Brand",
+      "required": true,
+      "displayInList": true,
+      "default": "Feather"
+    },
+    {
+      "id": "startDate",
+      "type": "date",
+      "label": "First Use",
+      "required": true,
+      "displayInList": true,
+      "sortable": true
+    },
+    {
+      "id": "usages",
+      "type": "array",
+      "label": "Usage Dates",
+      "itemType": "date",
+      "default": []
+    },
+    {
+      "id": "status",
+      "type": "select",
+      "label": "Status",
+      "options": ["active", "retired"],
+      "default": "active",
+      "displayInList": true,
+      "filter": true
+    }
+  ],
+  "defaultSort": {
+    "field": "startDate",
+    "order": "desc"
+  },
+  "views": {
+    "list": {
+      "showComputed": true,
+      "computed": {
+        "usageCount": {
+          "label": "Uses",
+          "expression": "usages.length"
+        },
+        "lastUse": {
+          "label": "Last Use",
+          "expression": "usages[usages.length - 1]",
+          "type": "date"
+        },
+        "daysSinceStart": {
+          "label": "Days Active",
+          "expression": "(Date.now() - new Date(startDate)) / (1000 * 60 * 60 * 24)"
+        }
+      }
+    }
+  }
+}
