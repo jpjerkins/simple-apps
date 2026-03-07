@@ -62,10 +62,19 @@ export default function ListView({ schema }) {
       }
 
       if (expression.includes('Date.now()') && expression.includes('startDate')) {
-        // Days since start calculation
+        // Days active calculation
         const startDate = new Date(item.startDate);
-        const now = new Date();
-        const days = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
+
+        // For retired razors, use last usage date; for active, use today
+        let endDate;
+        if (item.status === 'retired' && Array.isArray(item.usages) && item.usages.length > 0) {
+          const lastUsage = item.usages[item.usages.length - 1];
+          endDate = new Date(lastUsage);
+        } else {
+          endDate = new Date();
+        }
+
+        const days = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24));
         return days;
       }
 
