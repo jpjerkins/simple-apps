@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  simple-apps:
+    build: .
+    container_name: simple-apps
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./apps:/app/apps
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
