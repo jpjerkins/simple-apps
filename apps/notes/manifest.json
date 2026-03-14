@@ -1,0 +1,17 @@
+{
+  "$schema": "../manifest.schema.json",
+  "name": "notes",
+  "label": "Notes",
+  "version": "1.0.0",
+  "description": "Obsidian notes imported from the vault.",
+  "icon": "📝",
+  "url_prefix": "/notes",
+  "api_prefix": "/api/notes",
+  "db_path": "apps/notes/data/notes.db",
+  "router_module": "apps.notes.router",
+  "frontend_dist": "apps/notes/frontend/dist",
+  "events": {
+    "emits": ["notes.item.created", "notes.item.updated"],
+    "consumes": []
+  }
+}

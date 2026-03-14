@@ -123,6 +123,18 @@ class AiDatabase:
             from_app, from_item_id, relation_type, to_app, to_item_id,
         )
 
+    def delete_relationships_from(self, app_name: str, item_id: int) -> int:
+        """Delete all edges where this item is the source. Returns count deleted."""
+        with self._connect() as conn:
+            cursor = conn.execute(
+                "DELETE FROM relationships WHERE from_app = ? AND from_item_id = ?",
+                (app_name, item_id),
+            )
+        count = cursor.rowcount
+        if count:
+            logger.debug("ai_db: deleted %d outgoing relationships from %s/%d", count, app_name, item_id)
+        return count
+
     def get_relationships(self, app_name: str, item_id: int) -> list[dict]:
         """Return all edges where item is on from or to side. metadata is decoded from JSON.
 

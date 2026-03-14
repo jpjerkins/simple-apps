@@ -10,6 +10,8 @@ services:
       # Mount apps/ from the data drive so per-app data/ and frontend/dist/
       # dirs persist across rebuilds and are included in backups.
       - /mnt/data/simple-apps/apps:/app/apps
+      # Mount the Obsidian notes vault read-only for the file watcher.
+      - /mnt/data/nextcloud-appdata/data/phil/files/Notes:/app/notes:ro
     restart: unless-stopped
     environment:
       - PYTHONUNBUFFERED=1

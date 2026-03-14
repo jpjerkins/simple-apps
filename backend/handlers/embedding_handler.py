@@ -69,6 +69,11 @@ def create_embedding_text(app_name: str, item_data: dict) -> str:
         )
     if app_name == "todos":
         return f"Task: {item_data.get('title', '')}. {item_data.get('description', '')}"
+    if app_name == "notes":
+        title = item_data.get("title", "")
+        tags = " ".join(item_data.get("tags") or [])
+        content = item_data.get("content", "")
+        return f"{title}. Tags: {tags}. {content}"
     # Generic fallback — join all string field values
     string_values = [str(v) for v in item_data.values() if isinstance(v, str) and v]
     return " ".join(string_values)

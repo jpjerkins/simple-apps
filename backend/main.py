@@ -29,6 +29,7 @@ from backend.platform.ai_db import ai_db
 from backend.platform.discovery import discover_apps
 from backend.platform.relationship_queries import get_related
 from backend.platform.semantic_search import search as semantic_search
+from backend.services.file_watcher import start_file_watcher
 
 
 class SemanticSearchRequest(BaseModel):
@@ -52,6 +53,7 @@ _manifests = discover_apps()
 # ---------------------------------------------------------------------------
 
 ai_db.init()
+start_file_watcher()
 for _m in _manifests:
     subscribe(f"{_m.name}.item.created", handle_item_created)
     subscribe(f"{_m.name}.item.updated", handle_item_updated)
