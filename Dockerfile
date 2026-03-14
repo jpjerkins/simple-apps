@@ -15,6 +15,7 @@ RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTr
 COPY backend/ ./backend/
 COPY apps/ ./apps/
 COPY platform/ ./platform/
+COPY scripts/ ./scripts/
 COPY conftest.py ./
 
 # Data dirs are created on first run by AppDatabase.init(); nothing to pre-create.
