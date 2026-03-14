@@ -88,6 +88,20 @@ When migrating data from TiddlyWiki or other sources:
 - Log any data transformation decisions
 - Keep original data as backup until migration verified
 
+## Simple Apps Skill
+
+To interact with Simple Apps data during a session, import the skill:
+
+```python
+from skills.claude_code.simple_apps import (
+    search_semantic, find_related,
+    list_items, get_item, create_item, update_item, delete_item,
+    list_apps,
+)
+```
+
+The skill connects to `http://localhost:8000` by default. See `skills/claude_code/README.md` for full usage.
+
 <!-- ooo:START -->
 <!-- ooo:VERSION:0.20.0 -->
 # Ouroboros — Specification-First AI Development
