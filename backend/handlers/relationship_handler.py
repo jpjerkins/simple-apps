@@ -63,17 +63,19 @@ def _extract_relationships(event_name: str, payload: dict) -> None:
 # Public event handlers
 # ---------------------------------------------------------------------------
 
-def handle_item_created(event_name: str, payload: dict) -> None:
-    """Handle <app>.item.created — extract and store relationships."""
+def _handle_upsert_event(event_name: str, payload: dict) -> None:
+    """Shared logic for item.created and item.updated — extract and store relationships."""
     try:
         _extract_relationships(event_name, payload)
     except Exception:
         logger.exception("relationship_handler: error processing %r", event_name)
+
+
+def handle_item_created(event_name: str, payload: dict) -> None:
+    """Handle <app>.item.created — extract and store relationships."""
+    _handle_upsert_event(event_name, payload)
 
 
 def handle_item_updated(event_name: str, payload: dict) -> None:
     """Handle <app>.item.updated — re-extract relationships (duplicates ignored)."""
-    try:
-        _extract_relationships(event_name, payload)
-    except Exception:
-        logger.exception("relationship_handler: error processing %r", event_name)
+    _handle_upsert_event(event_name, payload)

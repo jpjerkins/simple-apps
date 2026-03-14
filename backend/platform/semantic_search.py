@@ -12,30 +12,13 @@ from __future__ import annotations
 import logging
 import math
 import struct
-import threading
 from typing import Any, Dict, List, Optional
 
 from backend.handlers.embedding_handler import _get_model
 from backend.platform.ai_db import ai_db
-from backend.platform.app_db import AppDatabase
-from backend.platform.discovery import discover_apps
+from backend.platform.app_db_cache import get_app_databases
 
 logger = logging.getLogger(__name__)
-
-# Lazily populated on first search call — maps app_name → AppDatabase instance.
-_app_dbs: Dict[str, AppDatabase] | None = None
-_app_dbs_lock = threading.Lock()
-
-
-def _get_app_databases() -> Dict[str, AppDatabase]:
-    """Return app_name → AppDatabase mapping, built once at first call (thread-safe)."""
-    global _app_dbs
-    if _app_dbs is None:
-        with _app_dbs_lock:
-            if _app_dbs is None:
-                _app_dbs = {m.name: AppDatabase(m.db_path) for m in discover_apps()}
-                logger.debug("semantic_search: cached %d app databases", len(_app_dbs))
-    return _app_dbs
 
 
 def _decode_vector(vector_bytes: bytes) -> List[float]:
@@ -78,7 +61,7 @@ def search(
     ]
     scored.sort(key=lambda t: t[0], reverse=True)
 
-    app_databases = _get_app_databases()
+    app_databases = get_app_databases()
     results: List[Dict[str, Any]] = []
     for similarity, result_app_name, item_id in scored[:limit]:
         db = app_databases.get(result_app_name)

@@ -124,13 +124,17 @@ class AiDatabase:
         )
 
     def get_relationships(self, app_name: str, item_id: int) -> list[dict]:
-        """Return all edges where item is on from or to side. metadata is decoded from JSON."""
+        """Return all edges where item is on from or to side. metadata is decoded from JSON.
+
+        Uses UNION so SQLite can use idx_rel_from and idx_rel_to separately.
+        """
         with self._connect() as conn:
             rows = conn.execute(
                 "SELECT from_app, from_item_id, to_app, to_item_id, relation_type, metadata"
-                " FROM relationships"
-                " WHERE (from_app = ? AND from_item_id = ?)"
-                "    OR (to_app   = ? AND to_item_id   = ?)",
+                " FROM relationships WHERE from_app = ? AND from_item_id = ?"
+                " UNION "
+                "SELECT from_app, from_item_id, to_app, to_item_id, relation_type, metadata"
+                " FROM relationships WHERE to_app = ? AND to_item_id = ?",
                 (app_name, item_id, app_name, item_id),
             ).fetchall()
         return [
