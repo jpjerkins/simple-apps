@@ -7,6 +7,11 @@ Scans apps/*/manifest.json directly (avoids importing discovery.py which
 pulls in FastAPI). Skips items that already have an embedding. Safe to re-run.
 """
 
+# Pre-cache stdlib `platform` before sys.path is modified.
+# The top-level platform/ package in this repo would shadow the stdlib module
+# once /app is prepended to sys.path, breaking torch (which calls platform.system()).
+import platform as _stdlib_platform  # noqa: F401 — keep in sys.modules
+
 import json
 import sys
 from pathlib import Path

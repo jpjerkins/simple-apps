@@ -8,6 +8,9 @@ pulls in FastAPI). Uses INSERT OR IGNORE — safe to re-run. Existing
 relationships are not duplicated.
 """
 
+# Pre-cache stdlib `platform` before sys.path is modified (same reason as backfill_embeddings.py).
+import platform as _stdlib_platform  # noqa: F401 — keep in sys.modules
+
 import json
 import sqlite3
 import sys
