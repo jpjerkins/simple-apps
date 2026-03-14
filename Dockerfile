@@ -1,35 +1,19 @@
-# Stage 1: Build frontend
-FROM node:20-alpine AS frontend-builder
-
-WORKDIR /app/frontend
-
-COPY frontend/package*.json ./
-RUN npm install
-
-COPY frontend/ ./
-RUN npm run build
-
-# Stage 2: Python runtime with FastAPI
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy backend code
-COPY backend/ ./backend/
-COPY apps/ ./apps/
-
-# Install Python dependencies
+# Install Python dependencies first (layer-cached)
 COPY backend/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy built frontend from previous stage
-COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
+# Copy platform and app source code
+COPY backend/ ./backend/
+COPY apps/ ./apps/
+COPY platform/ ./platform/
+COPY conftest.py ./
 
-# Create data directory
-RUN mkdir -p /app/data
+# Data dirs are created on first run by AppDatabase.init(); nothing to pre-create.
 
-# Expose port
 EXPOSE 8000
 
-# Run the application
 CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]

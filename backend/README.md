@@ -12,8 +12,41 @@ FastAPI server providing generic CRUD API for all apps.
 - **`db.py`** (~40 lines) - SQLite connection management, table initialization
 - **`schema_registry.py`** (~60 lines) - Load and validate schemas from `/apps`
 - **`crud.py`** (~80 lines) - Generic CRUD operations (list, get, create, update, delete)
+- **`event_bus.py`** (~170 lines) - In-process publish/subscribe event bus (stub)
 
-**Total:** ~280 lines of Python
+**Total:** ~450 lines of Python
+
+## Event Bus
+
+`event_bus.py` provides a publish/subscribe interface for future inter-app communication.
+
+**Current status: stub** — events are logged but handlers are not invoked. The `_dispatch`
+function is implemented and tested; activate it in `publish()` when cross-app routing is needed.
+
+### Quick usage
+
+```python
+from backend.event_bus import publish, subscribe
+
+# Publisher (e.g. in todos router after creating an item):
+publish("todos.item_created", {"id": new_id, "title": title})
+
+# Subscriber (e.g. in another app's router at import time):
+def _on_todo_created(event_name: str, payload: dict) -> None:
+    ...
+
+subscribe("todos.item_created", _on_todo_created)
+```
+
+### Event naming convention
+
+`<app_name>.<verb>_<noun>` — e.g. `todos.item_created`, `books.item_deleted`
+
+### Tests
+
+```bash
+python backend/tests/test_event_bus.py
+```
 
 ## API Endpoints
 

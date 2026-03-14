@@ -5,10 +5,11 @@ services:
     build: .
     container_name: simple-apps
     ports:
-      - "8000:8000"
+      - "8001:8000"
     volumes:
-      - ./data:/app/data
-      - ./apps:/app/apps
+      # Mount apps/ from the data drive so per-app data/ and frontend/dist/
+      # dirs persist across rebuilds and are included in backups.
+      - /mnt/data/simple-apps/apps:/app/apps
     restart: unless-stopped
     environment:
       - PYTHONUNBUFFERED=1
