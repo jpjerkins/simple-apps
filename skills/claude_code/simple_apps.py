@@ -11,7 +11,7 @@ Requires: pip install httpx
 
 import httpx
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://localhost:8001"
 
 
 def search_semantic(query: str, app_name: str | None = None, limit: int = 10) -> list[dict]:
