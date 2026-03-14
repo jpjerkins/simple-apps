@@ -1,20 +1,15 @@
 """In-process event bus for inter-app communication.
 
 This module provides a publish/subscribe interface for apps to communicate
-without direct coupling. Currently a stub — events are logged but not routed.
+without direct coupling. Events are dispatched to handlers in background
+daemon threads so publishers are never blocked by slow or failing handlers.
 
 ## Architecture
 
 The event bus is an in-process singleton. Apps publish named events with a
 payload dict; other apps subscribe by event name and receive a handler callback.
-
-### Future Work
-
-When inter-app event routing is needed:
-- Replace ``_dispatch`` with actual handler invocation.
-- Consider async delivery (``asyncio.create_task``) to avoid blocking publishers.
-- Add persistence (SQLite event log) for replay/auditing.
-- Add dead-letter handling for failed handlers.
+Each publish call spawns one daemon thread per event (not per handler), so all
+handlers for an event run sequentially inside that thread.
 
 ### Adding a New Event
 
@@ -42,6 +37,7 @@ Examples: ``todos.item_created``, ``books.item_deleted``, ``razorblades.item_upd
 from __future__ import annotations
 
 import logging
+import threading
 from collections import defaultdict
 from typing import Any, Callable, Dict, List
 
@@ -97,16 +93,16 @@ def unsubscribe(event_name: str, handler: EventHandler) -> bool:
 def publish(event_name: str, payload: Dict[str, Any] | None = None) -> int:
     """Publish an event to all registered subscribers.
 
-    Currently a stub: events are logged but handlers are not yet invoked.
-    Remove the early-return stub comment below and enable ``_dispatch`` when
-    real inter-app routing is desired.
+    Handlers are dispatched in a background daemon thread so the caller
+    returns immediately. Individual handler failures are caught and logged;
+    they do not affect other handlers or the publisher.
 
     Args:
         event_name: Dot-separated event identifier, e.g. ``"todos.item_created"``.
         payload: Arbitrary dict of event data. Defaults to empty dict.
 
     Returns:
-        Number of handlers that were notified (0 while stubbed).
+        Number of handlers dispatched (equals the subscriber count at publish time).
 
     Example::
 
@@ -115,7 +111,7 @@ def publish(event_name: str, payload: Dict[str, Any] | None = None) -> int:
     if payload is None:
         payload = {}
 
-    handlers = _subscribers.get(event_name, [])
+    handlers = list(_subscribers.get(event_name, []))
     handler_count = len(handlers)
 
     logger.info(
@@ -125,22 +121,21 @@ def publish(event_name: str, payload: Dict[str, Any] | None = None) -> int:
         list(payload.keys()),
     )
 
-    # --- STUB: handler dispatch disabled until inter-app routing is needed ---
-    # When ready to activate, remove this comment block and call _dispatch:
-    #
-    #   return _dispatch(event_name, payload, handlers)
-    #
-    # Until then, handlers are registered but never called.
-    # -------------------------------------------------------------------------
+    if handlers:
+        threading.Thread(
+            target=_dispatch,
+            args=(event_name, payload, handlers),
+            daemon=True,
+        ).start()
 
-    return 0  # stub: no handlers invoked yet
+    return handler_count
 
 
 def _dispatch(event_name: str, payload: Dict[str, Any], handlers: List[EventHandler]) -> int:
     """Invoke all handlers for an event, catching individual failures.
 
-    This function exists for future activation — it is not called by
-    :func:`publish` while the bus is in stub mode.
+    Called from a background daemon thread by :func:`publish`. Handler
+    exceptions are logged and do not prevent remaining handlers from running.
 
     Args:
         event_name: Event identifier forwarded to each handler.

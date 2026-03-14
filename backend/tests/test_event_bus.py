@@ -1,7 +1,8 @@
-"""Tests for the in-process event bus stub."""
+"""Tests for the in-process event bus."""
 
 import sys
 import os
+import threading
 
 # Allow running directly without package install
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -56,20 +57,38 @@ def test_subscribe_non_callable_raises():
 
 
 # ---------------------------------------------------------------------------
-# Publish (stub mode — handlers registered but not called)
+# Publish (active — handlers dispatched in background threads)
 # ---------------------------------------------------------------------------
 
-def test_publish_returns_zero_while_stubbed():
-    called = []
+def test_publish_invokes_handlers_in_background():
+    """Handler must be called asynchronously within 2 seconds of publish."""
+    done = threading.Event()
 
     def handler(name, payload):
-        called.append(name)
+        done.set()
 
     event_bus.subscribe("app.event", handler)
     count = event_bus.publish("app.event", {"key": "value"})
 
-    assert count == 0
-    assert called == [], "Stub should NOT invoke handlers"
+    assert count == 1
+    assert done.wait(timeout=2.0), "Handler was not invoked within 2 seconds"
+
+
+def test_publish_handler_exception_does_not_block():
+    """A failing handler must not prevent a subsequent good handler from running."""
+    good_done = threading.Event()
+
+    def bad_handler(name, payload):
+        raise RuntimeError("intentional failure")
+
+    def good_handler(name, payload):
+        good_done.set()
+
+    event_bus.subscribe("app.event", bad_handler)
+    event_bus.subscribe("app.event", good_handler)
+    event_bus.publish("app.event", {})
+
+    assert good_done.wait(timeout=2.0), "Good handler was not invoked after bad handler raised"
 
 
 def test_publish_with_no_subscribers_returns_zero():
@@ -79,13 +98,27 @@ def test_publish_with_no_subscribers_returns_zero():
 
 def test_publish_with_none_payload_defaults_to_empty_dict():
     # Should not raise
+    done = threading.Event()
+
+    def handler(name, payload):
+        done.set()
+
+    event_bus.subscribe("app.event", handler)
     count = event_bus.publish("app.event", None)
-    assert count == 0
+    assert count == 1
+    done.wait(timeout=2.0)  # allow background thread to settle
 
 
 def test_publish_with_no_payload_argument():
+    done = threading.Event()
+
+    def handler(name, payload):
+        done.set()
+
+    event_bus.subscribe("app.event", handler)
     count = event_bus.publish("app.event")
-    assert count == 0
+    assert count == 1
+    done.wait(timeout=2.0)
 
 
 # ---------------------------------------------------------------------------
@@ -165,7 +198,8 @@ if __name__ == "__main__":
         test_unsubscribe_removes_handler,
         test_unsubscribe_nonexistent_returns_false,
         test_subscribe_non_callable_raises,
-        test_publish_returns_zero_while_stubbed,
+        test_publish_invokes_handlers_in_background,
+        test_publish_handler_exception_does_not_block,
         test_publish_with_no_subscribers_returns_zero,
         test_publish_with_none_payload_defaults_to_empty_dict,
         test_publish_with_no_payload_argument,

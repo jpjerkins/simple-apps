@@ -14,6 +14,13 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
+from backend.event_bus import subscribe
+from backend.handlers.embedding_handler import (
+    handle_item_created,
+    handle_item_deleted,
+    handle_item_updated,
+)
+from backend.platform.ai_db import ai_db
 from backend.platform.discovery import discover_apps
 
 _PLATFORM_STATIC = Path(__file__).parent.parent / "platform" / "static"
@@ -25,6 +32,20 @@ app = FastAPI(title="Simple Apps Platform")
 # ---------------------------------------------------------------------------
 
 _manifests = discover_apps()
+
+# ---------------------------------------------------------------------------
+# AI platform startup — initialize DB and wire embedding handlers
+# ---------------------------------------------------------------------------
+
+ai_db.init()
+for _m in _manifests:
+    subscribe(f"{_m.name}.item.created", handle_item_created)
+    subscribe(f"{_m.name}.item.updated", handle_item_updated)
+    subscribe(f"{_m.name}.item.deleted", handle_item_deleted)
+
+# ---------------------------------------------------------------------------
+# Mount app routers and frontends
+# ---------------------------------------------------------------------------
 
 for _m in _manifests:
     app.include_router(_m.router, prefix=_m.api_prefix, tags=[_m.label])
