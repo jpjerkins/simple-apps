@@ -13,6 +13,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
 from backend.event_bus import subscribe
 from backend.handlers.embedding_handler import (
@@ -22,6 +23,14 @@ from backend.handlers.embedding_handler import (
 )
 from backend.platform.ai_db import ai_db
 from backend.platform.discovery import discover_apps
+from backend.platform.semantic_search import search as semantic_search
+
+
+class SemanticSearchRequest(BaseModel):
+    query: str
+    app_name: str | None = None
+    limit: int = 10
+
 
 _PLATFORM_STATIC = Path(__file__).parent.parent / "platform" / "static"
 
@@ -81,3 +90,9 @@ def list_apps() -> JSONResponse:
         }
         for m in _manifests
     ])
+
+
+@app.post("/api/search/semantic")
+def semantic_search_route(request: SemanticSearchRequest) -> JSONResponse:
+    """Return items semantically similar to the query, ranked by cosine similarity."""
+    return JSONResponse(semantic_search(request.query, request.app_name, request.limit))
