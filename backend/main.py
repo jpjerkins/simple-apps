@@ -21,8 +21,13 @@ from backend.handlers.embedding_handler import (
     handle_item_deleted,
     handle_item_updated,
 )
+from backend.handlers.relationship_handler import (
+    handle_item_created as rel_handle_created,
+    handle_item_updated as rel_handle_updated,
+)
 from backend.platform.ai_db import ai_db
 from backend.platform.discovery import discover_apps
+from backend.platform.relationship_queries import get_related
 from backend.platform.semantic_search import search as semantic_search
 
 
@@ -51,6 +56,8 @@ for _m in _manifests:
     subscribe(f"{_m.name}.item.created", handle_item_created)
     subscribe(f"{_m.name}.item.updated", handle_item_updated)
     subscribe(f"{_m.name}.item.deleted", handle_item_deleted)
+    subscribe(f"{_m.name}.item.created", rel_handle_created)
+    subscribe(f"{_m.name}.item.updated", rel_handle_updated)
 
 # ---------------------------------------------------------------------------
 # Mount app routers and frontends
@@ -96,3 +103,20 @@ def list_apps() -> JSONResponse:
 def semantic_search_route(request: SemanticSearchRequest) -> JSONResponse:
     """Return items semantically similar to the query, ranked by cosine similarity."""
     return JSONResponse(semantic_search(request.query, request.app_name, request.limit))
+
+
+@app.get("/api/relationships/{app_name}/{item_id}")
+def get_relationships_route(
+    app_name: str,
+    item_id: int,
+    relation_type: str | None = None,
+    max_depth: int = 2,
+) -> JSONResponse:
+    """Return items related to the given item via BFS graph traversal.
+
+    Query params:
+        relation_type: Filter to a specific edge type (e.g. ``recommended_by``).
+        max_depth:     Number of hops to follow (1–3; capped at 3).
+    """
+    results = get_related(item_id, app_name, relation_type, max_depth)
+    return JSONResponse(results)
