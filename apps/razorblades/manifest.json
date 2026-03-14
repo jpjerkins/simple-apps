@@ -1,0 +1,17 @@
+{
+  "$schema": "../manifest.schema.json",
+  "name": "razorblades",
+  "label": "Razor Blade Tracker",
+  "version": "1.0.0",
+  "description": "Track razor blade usage to know when to replace.",
+  "icon": "🪒",
+  "url_prefix": "/razorblades",
+  "api_prefix": "/api/razorblades",
+  "db_path": "apps/razorblades/data/razorblades.db",
+  "router_module": "apps.razorblades.router",
+  "frontend_dist": "apps/razorblades/frontend/dist",
+  "events": {
+    "emits": ["razorblades.blade.created", "razorblades.blade.retired"],
+    "consumes": []
+  }
+}

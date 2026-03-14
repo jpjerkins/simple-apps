@@ -1,0 +1,17 @@
+{
+  "$schema": "../manifest.schema.json",
+  "name": "todos",
+  "label": "To-Do List",
+  "version": "1.0.0",
+  "description": "Simple task tracker for daily todos.",
+  "icon": "✓",
+  "url_prefix": "/todos",
+  "api_prefix": "/api/todos",
+  "db_path": "apps/todos/data/todos.db",
+  "router_module": "apps.todos.router",
+  "frontend_dist": "apps/todos/frontend/dist",
+  "events": {
+    "emits": ["todos.item.created", "todos.item.updated", "todos.item.deleted"],
+    "consumes": []
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "../manifest.schema.json",
+  "name": "books",
+  "label": "Books",
+  "version": "1.0.0",
+  "description": "Reading list and completed books tracker.",
+  "icon": "📚",
+  "url_prefix": "/books",
+  "api_prefix": "/api/books",
+  "db_path": "apps/books/data/books.db",
+  "router_module": "apps.books.router",
+  "frontend_dist": "apps/books/frontend/dist",
+  "events": {
+    "emits": ["books.item.created", "books.item.completed"],
+    "consumes": []
+  }
+}

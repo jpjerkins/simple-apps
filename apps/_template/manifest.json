@@ -1,0 +1,17 @@
+{
+  "$schema": "../manifest.schema.json",
+  "name": "myapp",
+  "label": "My App",
+  "version": "1.0.0",
+  "description": "One sentence describing what this app does.",
+  "icon": "📝",
+  "url_prefix": "/myapp",
+  "api_prefix": "/api/myapp",
+  "db_path": "apps/myapp/data/myapp.db",
+  "router_module": "apps.myapp.router",
+  "frontend_dist": "apps/myapp/frontend/dist",
+  "events": {
+    "emits": [],
+    "consumes": []
+  }
+}

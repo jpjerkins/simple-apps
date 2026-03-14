@@ -1,0 +1,90 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://simple-apps/manifest.schema.json",
+  "title": "App Manifest",
+  "description": "Defines a single app hosted by the simple-apps shared platform. Every app directory must contain a manifest.json that satisfies this schema.",
+  "type": "object",
+  "required": ["name", "label", "version", "description", "db_path", "router_module", "frontend_dist", "url_prefix"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]*$",
+      "description": "Unique machine-readable slug for this app. Lowercase, alphanumeric, hyphens and underscores only. Must match the directory name under apps/. Example: 'todos', 'razorblades', 'books'."
+    },
+    "label": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable display name shown in the navigation bar and page titles. Example: 'To-Do List', 'Razor Blade Tracker'."
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version string (MAJOR.MINOR.PATCH). Increment PATCH for bug fixes, MINOR for new features, MAJOR for breaking changes. Example: '1.0.0'."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "description": "One-sentence plain-English description of what the app does. Shown in the platform home page / app picker."
+    },
+    "icon": {
+      "type": "string",
+      "description": "Emoji or short string used as the app icon in navigation and headings. Optional. Example: '✓', '🪒', '📚'."
+    },
+    "url_prefix": {
+      "type": "string",
+      "pattern": "^/[a-z][a-z0-9_-]*$",
+      "description": "URL path prefix under which this app's frontend is served. Must start with '/' and match the app name. The platform mounts the frontend dist at this path. Example: '/todos'."
+    },
+    "api_prefix": {
+      "type": "string",
+      "pattern": "^/api/[a-z][a-z0-9_-]*$",
+      "description": "URL path prefix for this app's REST API endpoints. Defaults to '/api/<name>' if omitted. Example: '/api/todos'."
+    },
+    "db_path": {
+      "type": "string",
+      "description": "Path to the app's SQLite database file, relative to the repository root. The platform creates the file and parent directory if they do not exist. This path should live inside a volume-mounted directory so data persists across container restarts. Example: 'apps/todos/data/todos.db'."
+    },
+    "router_module": {
+      "type": "string",
+      "pattern": "^[a-zA-Z_][a-zA-Z0-9_.]*$",
+      "description": "Python dotted module path to the FastAPI APIRouter object named 'router' inside the app package. The platform imports this module at startup and mounts the router at api_prefix. Example: 'apps.todos.router'."
+    },
+    "frontend_dist": {
+      "type": "string",
+      "description": "Path to the compiled React/Vite dist/ folder, relative to the repository root. This directory is volume-mounted so new builds can be deployed without an image rebuild. The platform serves static files from here at url_prefix. Example: 'apps/todos/frontend/dist'."
+    },
+    "events": {
+      "type": "object",
+      "description": "Groundwork declaration for the future inter-app event bus. Both arrays are currently unused by the platform but are parsed at startup for validation and future routing. See docs/event-bus.md for the full design.",
+      "additionalProperties": false,
+      "properties": {
+        "emits": {
+          "type": "array",
+          "description": "Event type strings this app will publish to the bus. Example: ['todo.created', 'todo.completed'].",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]*(\\.[a-z][a-z0-9_-]*)+$",
+            "description": "Dot-namespaced event type. Convention: '<app>.<noun>.<verb>', e.g. 'todos.item.created'."
+          },
+          "uniqueItems": true
+        },
+        "consumes": {
+          "type": "array",
+          "description": "Event type strings this app subscribes to from the bus. Example: ['books.item.completed'].",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_-]*(\\.[a-z][a-z0-9_-]*)+$",
+            "description": "Dot-namespaced event type. Must match an event declared in the 'emits' list of another app."
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Arbitrary key-value pairs for app-specific configuration that does not fit the standard fields. The platform ignores this object but passes it through to the router on startup.",
+      "additionalProperties": true
+    }
+  }
+}
