@@ -16,7 +16,9 @@ venv/
 ENV/
 build/
 develop-eggs/
-dist/
+# dist/ intentionally omitted here — too broad; it matches app frontend build
+# artifacts that ARE committed (Dockerfile has no npm build step).
+# Root frontend dist is excluded below under Node / Frontend.
 downloads/
 eggs/
 .eggs/
@@ -39,6 +41,9 @@ yarn-error.log*
 .pnpm-debug.log*
 /frontend/dist/
 /frontend/build/
+
+# App-specific: data dirs (belt-and-suspenders; also caught by top-level data/)
+apps/*/data/
 
 # IDEs
 .vscode/
