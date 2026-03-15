@@ -85,9 +85,12 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
+    .app-card--no-ui { cursor: default; opacity: 0.75; }
+    .app-card--no-ui:hover { transform: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     .card-icon { font-size: 2.5rem; flex-shrink: 0; }
     .card-body h2 { font-size: 1.25rem; margin-bottom: 0.25rem; }
     .card-body p { color: #666; font-size: 0.95rem; }
+    .card-hint { font-size: 0.8rem; color: #aaa; margin-top: 0.25rem; }
 
     /* States */
     .loading, .error {
@@ -128,22 +131,36 @@
         const nav = document.getElementById('nav-apps');
         const grid = document.getElementById('app-grid');
 
-        nav.innerHTML = apps.map(app => `
-          <a href="${app.url_prefix}" class="navbar-app">
-            <span class="app-icon">${app.icon}</span>
-            <span class="app-name">${app.label}</span>
-          </a>
-        `).join('');
+        nav.innerHTML = apps
+          .filter(app => app.has_frontend)
+          .map(app => `
+            <a href="${app.url_prefix}" class="navbar-app">
+              <span class="app-icon">${app.icon}</span>
+              <span class="app-name">${app.label}</span>
+            </a>
+          `).join('');
 
-        grid.innerHTML = apps.map(app => `
-          <a href="${app.url_prefix}" class="app-card">
-            <span class="card-icon">${app.icon}</span>
-            <div class="card-body">
-              <h2>${app.label}</h2>
-              <p>${app.description}</p>
-            </div>
-          </a>
-        `).join('');
+        grid.innerHTML = apps.map(app => {
+          if (app.has_frontend) {
+            return `
+              <a href="${app.url_prefix}" class="app-card">
+                <span class="card-icon">${app.icon}</span>
+                <div class="card-body">
+                  <h2>${app.label}</h2>
+                  <p>${app.description}</p>
+                </div>
+              </a>`;
+          }
+          return `
+            <div class="app-card app-card--no-ui">
+              <span class="card-icon">${app.icon}</span>
+              <div class="card-body">
+                <h2>${app.label}</h2>
+                <p>${app.description}</p>
+                <p class="card-hint">Available via search &amp; API only</p>
+              </div>
+            </div>`;
+        }).join('');
       })
       .catch(() => {
         document.getElementById('app-grid').innerHTML =

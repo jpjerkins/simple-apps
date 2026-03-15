@@ -96,6 +96,7 @@ def list_apps() -> JSONResponse:
             "description": m.description,
             "icon": m.icon,
             "url_prefix": m.url_prefix,
+            "has_frontend": m.frontend_dist.is_dir(),
         }
         for m in _manifests
     ])
