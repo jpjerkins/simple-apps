@@ -107,6 +107,27 @@ To preview changes before promoting to production:
 
 The dev container uses `~/dev/simple-apps/apps/` for its data (separate DBs from production). Production on port 8001 is unaffected.
 
+## Promoting to Production
+
+After tearing down the dev container, two steps are needed:
+
+1. **Sync app code** to the live volume mount (the Docker image alone is not enough — apps are served from a bind mount):
+   ```bash
+   rsync -av --delete ~/dev/simple-apps/apps/<appname>/ /mnt/data/simple-apps/apps/<appname>/
+   ```
+
+2. **Rebuild and redeploy** the image (picks up backend/platform changes):
+   ```bash
+   dcm-promote simple-apps && dcm-upgrade simple-apps
+   ```
+
+3. **Restart the container** so the backend re-discovers any newly added apps:
+   ```bash
+   docker restart simple-apps-simple-apps-1
+   ```
+
+> **Why:** The prod container bind-mounts `/mnt/data/simple-apps/apps` → `/app/apps`. New or changed app directories must be synced there explicitly; `dcm-upgrade` rebuilds the image but does not touch the bind-mounted volume.
+
 ## Data Migration
 
 When migrating data from TiddlyWiki or other sources:
