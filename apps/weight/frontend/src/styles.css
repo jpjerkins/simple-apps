@@ -1,0 +1,245 @@
+/* Reset */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { overflow-x: hidden; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f5f5f5;
+  color: #333;
+  overflow-x: hidden;
+}
+
+/* Layout */
+.app { min-height: 100vh; display: flex; flex-direction: column; }
+
+.main-content {
+  flex: 1;
+  padding: 0.75rem;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Navbar */
+.navbar {
+  background: #2c3e50;
+  color: white;
+  padding: 0.5rem 1rem;
+}
+.navbar-brand a {
+  color: white;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 0.4rem;
+}
+.navbar-apps { display: flex; gap: 0.5rem; }
+.navbar-app {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  background: #34495e;
+  border-radius: 4px;
+}
+.app-icon { font-size: 1.1rem; }
+
+/* Weight view */
+.weight-view { display: flex; flex-direction: column; gap: 0.75rem; }
+
+/* Chart */
+.weight-chart-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 0.75rem 0.5rem 0.5rem;
+}
+.weight-chart-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.chart-empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+/* Range selector */
+.range-selector {
+  display: flex;
+  gap: 0.5rem;
+}
+.range-btn {
+  flex: 1;
+  padding: 0.6rem 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  font-size: 0.9rem;
+  cursor: pointer;
+  min-height: 44px;
+  color: #555;
+  transition: background 0.15s, color 0.15s;
+}
+.range-btn:hover { background: #f0f0f0; }
+.range-btn-active {
+  background: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+/* Entry form — one row */
+.entry-form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+  background: white;
+  padding: 0.6rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.entry-input {
+  padding: 0.6rem 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  min-height: 44px;
+  background: #fafafa;
+}
+.entry-weight {
+  width: 80px;
+  flex-shrink: 0;
+}
+.entry-date {
+  flex: 1;
+  min-width: 0;
+}
+.entry-save {
+  flex-shrink: 0;
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  min-height: 44px;
+  white-space: nowrap;
+}
+
+/* Buttons */
+.btn-primary  { background: #3498db; color: white; }
+.btn-primary:hover  { background: #2980b9; }
+.btn-primary:disabled { background: #a8d4ef; cursor: not-allowed; }
+.btn-secondary { background: #95a5a6; color: white; }
+.btn-secondary:hover { background: #7f8c8d; }
+.btn-sm {
+  padding: 0.45rem 0.9rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+/* Entries table */
+.entries-section { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.table-container {
+  background: white;
+  border-radius: 8px;
+  overflow-x: auto;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th,
+.data-table td {
+  padding: 0.65rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #e8e8e8;
+}
+.data-table th { background: #f8f9fa; font-weight: 600; font-size: 0.875rem; }
+.data-table tr:last-child td { border-bottom: none; }
+.actions-column { text-align: right; white-space: nowrap; }
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+.page-info { font-size: 0.875rem; color: #666; }
+
+/* Edit dialog */
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 1rem;
+}
+.dialog {
+  background: white;
+  border-radius: 10px;
+  padding: 1.25rem;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+.dialog-title {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+.dialog-fields { display: flex; flex-direction: column; gap: 0.75rem; }
+.dialog-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.field-input {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  min-height: 44px;
+}
+.dialog-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1.25rem;
+}
+.dialog-actions button {
+  flex: 1;
+  padding: 0.65rem;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+/* Utility */
+.empty-state {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: #999;
+}
+
+/* Desktop */
+@media (min-width: 768px) {
+  .navbar {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+  .navbar-brand a { margin-bottom: 0; }
+  .main-content { padding: 1.5rem; }
+  .btn-sm { min-height: auto; }
+}

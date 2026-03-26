@@ -1,0 +1,17 @@
+{
+  "$schema": "../manifest.schema.json",
+  "name": "weight",
+  "label": "Weight Tracker",
+  "version": "1.0.0",
+  "description": "Track your weight over time.",
+  "icon": "⚖️",
+  "url_prefix": "/weight",
+  "api_prefix": "/api/weight",
+  "db_path": "apps/weight/data/weight.db",
+  "router_module": "apps.weight.router",
+  "frontend_dist": "apps/weight/frontend/dist",
+  "events": {
+    "emits": [],
+    "consumes": []
+  }
+}
