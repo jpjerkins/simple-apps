@@ -78,6 +78,35 @@ Follow this checklist when adding a new app:
 7. Test on mobile viewport
 8. **No code changes should be needed**
 
+## Local Preview (Dev Testing)
+
+To preview changes before promoting to production:
+
+1. **Build the frontend** (if any frontend files changed):
+   ```bash
+   cd apps/<appname>/frontend && npm run build
+   ```
+
+2. **Build and run a dev container** on port 8002, using the dev source:
+   ```bash
+   docker build -t simple-apps-dev ~/dev/simple-apps
+   docker run -d --name simple-apps-dev \
+     -p 8002:8000 \
+     -v /home/philj/dev/simple-apps/apps:/app/apps \
+     -v /mnt/data/nextcloud-appdata/data/phil/files/Notes:/app/notes:ro \
+     -e PYTHONUNBUFFERED=1 \
+     simple-apps-dev
+   ```
+
+3. **Preview at** `http://thejerkins.duckdns.org:8002`
+
+4. **Tear down** when done:
+   ```bash
+   docker rm -f simple-apps-dev
+   ```
+
+The dev container uses `~/dev/simple-apps/apps/` for its data (separate DBs from production). Production on port 8001 is unaffected.
+
 ## Data Migration
 
 When migrating data from TiddlyWiki or other sources:
