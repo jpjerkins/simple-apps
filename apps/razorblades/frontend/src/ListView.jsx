@@ -6,23 +6,19 @@ export default function ListView({ schema }) {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const handleUseRazor = () => {
-    fetch(`/api/${schema.id}/actions/use`, { method: 'POST' })
+  const callAction = (path, label) =>
+    fetch(`/api/${schema.id}/actions/${path}`, { method: 'POST' })
       .then(res => {
         if (!res.ok) return res.json().then(e => { throw new Error(e.detail || 'Failed'); });
         loadItems();
       })
-      .catch(err => alert(`Use Razor failed: ${err.message}`));
-  };
+      .catch(err => { alert(`${label} failed: ${err.message}`); loadItems(); });
+
+  const handleUseRazor = () => callAction('use', 'Use Razor');
 
   const handleNewRazor = () => {
     if (!confirm('Retire all active blades and start a new razor?')) return;
-    fetch(`/api/${schema.id}/actions/new-razor`, { method: 'POST' })
-      .then(res => {
-        if (!res.ok) return res.json().then(e => { throw new Error(e.detail || 'Failed'); });
-        loadItems();
-      })
-      .catch(err => alert(`New Razor failed: ${err.message}`));
+    callAction('new-razor', 'New Razor');
   };
 
   const loadItems = () => {

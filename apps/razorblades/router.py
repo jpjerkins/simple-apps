@@ -15,6 +15,15 @@ _db = AppDatabase(Path(__file__).parent / "data" / "razorblades.db")
 _db.init()
 
 _DEFAULT_SORT = {"field": "startDate", "order": "desc"}
+_DEFAULT_BRAND = "Feather"
+
+
+def _prepare_for_update(blade: Dict[str, Any]) -> tuple[int, Dict[str, Any]]:
+    """Strip DB-managed fields from a blade dict; return (id, cleaned_blade)."""
+    blade_id = blade.pop("id")
+    blade.pop("created_at", None)
+    blade.pop("updated_at", None)
+    return blade_id, blade
 
 
 # ---------------------------------------------------------------------------
@@ -79,10 +88,7 @@ def use_razor():
     active = [i for i in items if i.get("status") == "active"]
     if not active:
         raise HTTPException(status_code=404, detail="No active razor blade found")
-    blade = active[0]
-    blade_id = blade.pop("id")
-    blade.pop("created_at", None)
-    blade.pop("updated_at", None)
+    blade_id, blade = _prepare_for_update(active[0])
     blade.setdefault("usages", []).append(today)
     _db.update_item(blade_id, blade)
     updated = _db.get_item(blade_id)
@@ -97,14 +103,12 @@ def new_razor():
     items = _db.list_items()
     for blade in items:
         if blade.get("status") == "active":
-            blade_id = blade.pop("id")
-            blade.pop("created_at", None)
-            blade.pop("updated_at", None)
+            blade_id, blade = _prepare_for_update(blade)
             blade["status"] = "retired"
             _db.update_item(blade_id, blade)
             publish("razorblades.blade.retired", {"id": blade_id, **blade})
     new_id = _db.create_item({
-        "brand": "Feather",
+        "brand": _DEFAULT_BRAND,
         "startDate": today,
         "usages": [today],
         "status": "active",
