@@ -6,6 +6,25 @@ export default function ListView({ schema }) {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const handleUseRazor = () => {
+    fetch(`/api/${schema.id}/actions/use`, { method: 'POST' })
+      .then(res => {
+        if (!res.ok) return res.json().then(e => { throw new Error(e.detail || 'Failed'); });
+        loadItems();
+      })
+      .catch(err => alert(`Use Razor failed: ${err.message}`));
+  };
+
+  const handleNewRazor = () => {
+    if (!confirm('Retire all active blades and start a new razor?')) return;
+    fetch(`/api/${schema.id}/actions/new-razor`, { method: 'POST' })
+      .then(res => {
+        if (!res.ok) return res.json().then(e => { throw new Error(e.detail || 'Failed'); });
+        loadItems();
+      })
+      .catch(err => alert(`New Razor failed: ${err.message}`));
+  };
+
   const loadItems = () => {
     setLoading(true);
     fetch(`/api/${schema.id}/items`)
@@ -146,12 +165,17 @@ export default function ListView({ schema }) {
           <span className="app-icon">{schema.icon}</span>
           {schema.name}
         </h1>
-        <button
-          className="btn btn-primary"
-          onClick={() => navigate('/new')}
-        >
-          + Add Item
-        </button>
+        <div className="list-header-actions">
+          <button className="btn btn-primary" onClick={handleUseRazor}>
+            Use Razor
+          </button>
+          <button className="btn btn-warning" onClick={handleNewRazor}>
+            New Razor
+          </button>
+          <button className="btn btn-secondary btn-sm" onClick={() => navigate('/new')}>
+            + Add
+          </button>
+        </div>
       </div>
 
       {items.length === 0 ? (
